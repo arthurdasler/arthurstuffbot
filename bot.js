@@ -42,7 +42,7 @@ bot.onText(/\/start/, async (msg) => {
   if (users[chatId]) delete users[chatId];
 
   // Отправляем стартовое фото с меню
-  await bot.sendPhoto(chatId, "https://ik.imagekit.io/borsokov/TG-Bot/1.png", {
+  await bot.sendPhoto(chatId, "https://ik.imagekit.io/borsokov/TG-Bot/1.webp", {
     reply_markup: {
       keyboard: mainMenu,
       resize_keyboard: true
@@ -61,7 +61,7 @@ bot.on('message', async (msg) => {
   if (text === "Верификация") {
     users[chatId] = { awaitingCode: true };
 
-    await bot.sendPhoto(chatId, "https://ik.imagekit.io/borsokov/TG-Bot/2.png", {
+    await bot.sendPhoto(chatId, "https://ik.imagekit.io/borsokov/TG-Bot/2.webp", {
       reply_markup: {
         keyboard: [[{ text: "Назад" }]],
         resize_keyboard: true
@@ -80,7 +80,7 @@ bot.on('message', async (msg) => {
   }
 
   if (text === "Каталог") {
-    await bot.sendPhoto(chatId, "https://ik.imagekit.io/borsokov/TG-Bot/3.png", {
+    await bot.sendPhoto(chatId, "https://ik.imagekit.io/borsokov/TG-Bot/3.webp", {
       reply_markup: {
         inline_keyboard: [
           [
@@ -98,7 +98,7 @@ bot.on('message', async (msg) => {
   // --- Кнопка "Назад" из меню верификации ---
   if (text === "Назад" && users[chatId] && users[chatId].awaitingCode) {
     delete users[chatId];
-    await bot.sendPhoto(chatId, "https://ik.imagekit.io/borsokov/TG-Bot/1.png", {
+    await bot.sendPhoto(chatId, "https://ik.imagekit.io/borsokov/TG-Bot/1.webp", {
       reply_markup: {
         keyboard: mainMenu,
         resize_keyboard: true
