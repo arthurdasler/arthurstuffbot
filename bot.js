@@ -20,7 +20,7 @@ const db = getDatabase(appFirebase);
 // ----------- Конфиг Telegram -------------
 const token = process.env.BOT_TOKEN || "YOUR_BOT_TOKEN_HERE";
 const bot = new TelegramBot(token);
-const url = process.env.RENDER_EXTERNAL_URL || "https://your-app.onrender.com"; 
+const url = process.env.RENDER_EXTERNAL_URL || "https://your-app.onrender.com";
 const port = process.env.PORT || 3000;
 
 // ----------- Хранилище состояния пользователей -------------
@@ -51,9 +51,7 @@ bot.onText(/\/start/, async (msg) => {
 
   if (users[chatId]) delete users[chatId];
 
-  await bot.sendMessage(chatId,
-    "Главное меню:",
-    {
+  await bot.sendMessage(chatId,"Привет! Выбери, что тебя интересует:", {
       reply_markup: {
         keyboard: mainMenu,
         resize_keyboard: true
@@ -94,13 +92,13 @@ bot.on("message", async (msg) => {
 
   if (text === "Каталог") {
     await bot.sendMessage(chatId,
-      "Открыть каталог: https://arthurstuff.ru",
+      "Ознакомиться с полным каталогом",
       {
         reply_markup: {
           inline_keyboard: [
             [
               {
-                text: "Открыть каталог",
+                text: "Открыть",
                 web_app: { url: "https://arthurstuff.ru" }
               }
             ]
