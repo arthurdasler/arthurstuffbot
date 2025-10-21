@@ -1,5 +1,6 @@
 // Импорт библиотек
-import TelegramBot from 'node-telegram-bot-api';
+import express from "express";
+import TelegramBot from "node-telegram-bot-api";
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, get } from "firebase/database";
 
@@ -13,15 +14,14 @@ const firebaseConfig = {
   messagingSenderId: "536755331219",
   appId: "1:536755331219:web:232bb38b18590ce8756d66"
 };
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+const appFirebase = initializeApp(firebaseConfig);
+const db = getDatabase(appFirebase);
 
 // ----------- Конфиг Telegram -------------
-const token = process.env.BOT_TOKEN || "7306466390:AAHZ8QmWTeiR99HHSQAGsrlFqcllc8ZaMdg";
-const bot = new TelegramBot(token, { polling: true });
-
-console.log("Бот запущен ✅");
+const token = process.env.BOT_TOKEN || "YOUR_BOT_TOKEN_HERE";
+const bot = new TelegramBot(token);
+const url = process.env.RENDER_EXTERNAL_URL || "https://your-app.onrender.com"; // публичный URL Render
+const port = process.env.PORT || 3000;
 
 // ----------- Хранилище состояния пользователей -------------
 const users = {}; // chatId => { awaitingCode: boolean }
@@ -33,15 +33,24 @@ const mainMenu = [
   [{ text: "Каталог" }]
 ];
 
+// ----------- Настройка webhook ---------
+bot.setWebHook(`${url}/bot${token}`);
+
+// ----------- Express сервер ---------
+const app = express();
+app.use(express.json());
+
+app.post(`/bot${token}`, (req, res) => {
+  bot.processUpdate(req.body);
+  res.sendStatus(200);
+});
 
 // ----------- Стартовая команда ---------
 bot.onText(/\/start/, async (msg) => {
   const chatId = msg.chat.id;
 
-  // Сбрасываем старые состояния
   if (users[chatId]) delete users[chatId];
 
-  // Отправляем стартовое фото с меню
   await bot.sendPhoto(chatId, "https://ik.imagekit.io/borsokov/TG-Bot/1.webp", {
     reply_markup: {
       keyboard: mainMenu,
@@ -50,17 +59,15 @@ bot.onText(/\/start/, async (msg) => {
   });
 });
 
-// ----------- Обработчик всех сообщений -------------
-bot.on('message', async (msg) => {
+// ----------- Обработчик сообщений ---------
+bot.on("message", async (msg) => {
   const chatId = msg.chat.id;
   const text = msg.text ? msg.text.trim() : "";
 
-  if (!text || text.startsWith('/')) return; // игнорируем команды здесь
+  if (!text || text.startsWith("/")) return;
 
-  // --- Главное меню ---
   if (text === "Верификация") {
     users[chatId] = { awaitingCode: true };
-
     await bot.sendPhoto(chatId, "https://ik.imagekit.io/borsokov/TG-Bot/2.webp", {
       reply_markup: {
         keyboard: [[{ text: "Назад" }]],
@@ -86,7 +93,7 @@ bot.on('message', async (msg) => {
           [
             {
               text: "Открыть каталог",
-              web_app: { url: "https://arthurstuff.ru" } // твой домен
+              web_app: { url: "https://arthurstuff.ru" }
             }
           ]
         ]
@@ -95,7 +102,6 @@ bot.on('message', async (msg) => {
     return;
   }
 
-  // --- Кнопка "Назад" из меню верификации ---
   if (text === "Назад" && users[chatId] && users[chatId].awaitingCode) {
     delete users[chatId];
     await bot.sendPhoto(chatId, "https://ik.imagekit.io/borsokov/TG-Bot/1.webp", {
@@ -107,14 +113,11 @@ bot.on('message', async (msg) => {
     return;
   }
 
-  // --- Проверка кода (регистронезависимо) ---
   if (users[chatId] && users[chatId].awaitingCode) {
     const code = text.toLowerCase();
-
     try {
       const codeRef = ref(db, 'codes/' + code);
       const snapshot = await get(codeRef);
-
       if (snapshot.exists()) {
         const data = snapshot.val();
         await bot.sendMessage(chatId,
@@ -130,7 +133,6 @@ bot.on('message', async (msg) => {
       await bot.sendMessage(chatId, "⚠️ Ошибка запроса к Firebase");
     }
 
-    // Пользователь остаётся в подменю
     await bot.sendMessage(chatId, "Введите следующий код или нажмите 'Назад' для выхода:", {
       reply_markup: {
         keyboard: [[{ text: "Назад" }]],
@@ -139,4 +141,9 @@ bot.on('message', async (msg) => {
     });
     return;
   }
+});
+
+// ----------- Запуск сервера ---------
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });
