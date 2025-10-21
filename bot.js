@@ -20,7 +20,7 @@ const db = getDatabase(appFirebase);
 // ----------- Конфиг Telegram -------------
 const token = process.env.BOT_TOKEN || "YOUR_BOT_TOKEN_HERE";
 const bot = new TelegramBot(token);
-const url = process.env.RENDER_EXTERNAL_URL || "https://your-app.onrender.com"; // публичный URL Render
+const url = process.env.RENDER_EXTERNAL_URL || "https://your-app.onrender.com"; 
 const port = process.env.PORT || 3000;
 
 // ----------- Хранилище состояния пользователей -------------
@@ -51,12 +51,15 @@ bot.onText(/\/start/, async (msg) => {
 
   if (users[chatId]) delete users[chatId];
 
-  await bot.sendPhoto(chatId, "https://ik.imagekit.io/borsokov/TG-Bot/1.webp", {
-    reply_markup: {
-      keyboard: mainMenu,
-      resize_keyboard: true
+  await bot.sendMessage(chatId,
+    "Главное меню:",
+    {
+      reply_markup: {
+        keyboard: mainMenu,
+        resize_keyboard: true
+      }
     }
-  });
+  );
 });
 
 // ----------- Обработчик сообщений ---------
@@ -68,12 +71,15 @@ bot.on("message", async (msg) => {
 
   if (text === "Верификация") {
     users[chatId] = { awaitingCode: true };
-    await bot.sendPhoto(chatId, "https://ik.imagekit.io/borsokov/TG-Bot/2.webp", {
-      reply_markup: {
-        keyboard: [[{ text: "Назад" }]],
-        resize_keyboard: true
+    await bot.sendMessage(chatId,
+      "Введите код для верификации или нажмите 'Назад':",
+      {
+        reply_markup: {
+          keyboard: [[{ text: "Назад" }]],
+          resize_keyboard: true
+        }
       }
-    });
+    );
     return;
   }
 
@@ -87,29 +93,35 @@ bot.on("message", async (msg) => {
   }
 
   if (text === "Каталог") {
-    await bot.sendPhoto(chatId, "https://ik.imagekit.io/borsokov/TG-Bot/3.webp", {
-      reply_markup: {
-        inline_keyboard: [
-          [
-            {
-              text: "Открыть каталог",
-              web_app: { url: "https://arthurstuff.ru" }
-            }
+    await bot.sendMessage(chatId,
+      "Открыть каталог: https://arthurstuff.ru",
+      {
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: "Открыть каталог",
+                web_app: { url: "https://arthurstuff.ru" }
+              }
+            ]
           ]
-        ]
+        }
       }
-    });
+    );
     return;
   }
 
   if (text === "Назад" && users[chatId] && users[chatId].awaitingCode) {
     delete users[chatId];
-    await bot.sendPhoto(chatId, "https://ik.imagekit.io/borsokov/TG-Bot/1.webp", {
-      reply_markup: {
-        keyboard: mainMenu,
-        resize_keyboard: true
+    await bot.sendMessage(chatId,
+      "Главное меню:",
+      {
+        reply_markup: {
+          keyboard: mainMenu,
+          resize_keyboard: true
+        }
       }
-    });
+    );
     return;
   }
 
@@ -133,12 +145,15 @@ bot.on("message", async (msg) => {
       await bot.sendMessage(chatId, "⚠️ Ошибка запроса к Firebase");
     }
 
-    await bot.sendMessage(chatId, "Введите следующий код или нажмите 'Назад' для выхода:", {
-      reply_markup: {
-        keyboard: [[{ text: "Назад" }]],
-        resize_keyboard: true
+    await bot.sendMessage(chatId,
+      "Введите следующий код или нажмите 'Назад' для выхода:",
+      {
+        reply_markup: {
+          keyboard: [[{ text: "Назад" }]],
+          resize_keyboard: true
+        }
       }
-    });
+    );
     return;
   }
 });
