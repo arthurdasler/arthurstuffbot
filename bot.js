@@ -33,10 +33,15 @@ const mainMenu = [
   [{ text: "Каталог" }]
 ];
 
+
 // ----------- Стартовая команда ---------
 bot.onText(/\/start/, async (msg) => {
   const chatId = msg.chat.id;
 
+  // Сбрасываем старые состояния
+  if (users[chatId]) delete users[chatId];
+
+  // Отправляем стартовое фото с меню
   await bot.sendPhoto(chatId, "https://ik.imagekit.io/borsokov/TG-Bot/1.png", {
     reply_markup: {
       keyboard: mainMenu,
@@ -50,7 +55,7 @@ bot.on('message', async (msg) => {
   const chatId = msg.chat.id;
   const text = msg.text ? msg.text.trim() : "";
 
-  if (!text) return;
+  if (!text || text.startsWith('/')) return; // игнорируем команды здесь
 
   // --- Главное меню ---
   if (text === "Верификация") {
@@ -81,7 +86,7 @@ bot.on('message', async (msg) => {
           [
             {
               text: "Открыть каталог",
-              web_app: { url: "https://arthurstuff.ru" } // твой сайт
+              web_app: { url: "https://arthurstuff.ru" } // твой домен
             }
           ]
         ]
@@ -122,7 +127,7 @@ bot.on('message', async (msg) => {
       }
     } catch (err) {
       console.error(err);
-      await bot.sendMessage(chatId, "⚠️ Ошибка запроса к базе данных");
+      await bot.sendMessage(chatId, "⚠️ Ошибка запроса к Firebase");
     }
 
     // Пользователь остаётся в подменю
