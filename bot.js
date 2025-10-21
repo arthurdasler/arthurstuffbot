@@ -93,7 +93,7 @@ bot.on('message', async (msg) => {
   // --- Кнопка "Назад" из меню верификации ---
   if (text === "Назад" && users[chatId] && users[chatId].awaitingCode) {
     delete users[chatId];
-    await bot.sendMessage(chatId, "Главное меню:", {
+    await bot.sendPhoto(chatId, "https://ik.imagekit.io/borsokov/TG-Bot/1.png", {
       reply_markup: {
         keyboard: mainMenu,
         resize_keyboard: true
